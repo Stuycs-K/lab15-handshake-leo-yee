@@ -10,7 +10,8 @@
   returns the file descriptor for the upstream pipe.
   =========================*/
 int server_setup() {
-  int from_client = 0;
+  // printf("%s\n", "hi");
+  int from_client;
   mkfifo(WKP, 0666);
   from_client = open(WKP, O_RDONLY);
   remove(WKP);
@@ -28,12 +29,28 @@ int server_setup() {
   returns the file descriptor for the upstream pipe (see server setup).
   =========================*/
 int server_handshake(int *to_client) {
+  printf("%s\n", "testing");
   int from_client = server_setup();
+  printf("%d\n", from_client);
   char buffer[HANDSHAKE_BUFFER_SIZE];
   read(from_client, buffer, HANDSHAKE_BUFFER_SIZE);
-  sscanf(buffer,"%d", &from_client);
-  open(to_client)
+  printf("%s\n", buffer);
+  int fd = open(buffer, O_WRONLY);
+  write(fd, buffer, HANDSHAKE_BUFFER_SIZE);
+  // int from_client = server_setup();
+  // char client[HANDSHAKE_BUFFER_SIZE];
+  // sprintf(client, "%d", from_client);
+  // char buffer[HANDSHAKE_BUFFER_SIZE];
+  // int ack;
+  // read(from_client, buffer, HANDSHAKE_BUFFER_SIZE);
+  // sscanf(buffer,"%d", &from_client);
+  // int fd = open(from_client, O_WRONLY);
+  // //send SYN_ACK or pid + 1
+  // write(fd, SYN_ACK, HANDSHAKE_BUFFER_SIZE);
+  // read(from_client, buffer, HANDSHAKE_BUFFER_SIZE);
+  // sscanf(buffer,"%d", &ack);
 
+  printf("%s\n", "handshake complete");
   return from_client;
 }
 
@@ -49,13 +66,21 @@ int server_handshake(int *to_client) {
   =========================*/
 int client_handshake(int *to_server) {
   int from_server;
-  int pp = getpid();
-  mkfifo(pp, 0666);
+  char buffer[HANDSHAKE_BUFFER_SIZE];
+  int ack;
+  char pip[HANDSHAKE_BUFFER_SIZE];
+  sprintf(pip, "%d", getpid());
+  printf("%s\n", pip);
+  mkfifo(pip, 0666);
   int fd = open(WKP, O_WRONLY);
-  write(fd, HANDSHAKE_BUFFER_SIZE, 32);
-  fd = open(pp, O_RDONLY);
+  write(fd, pip, HANDSHAKE_BUFFER_SIZE);
+  fd = open(pip, O_RDONLY);
   //blocks
-  
+  remove(pip);
+  read(fd, buffer, HANDSHAKE_BUFFER_SIZE);
+  printf("%s\n", buffer);
+  sscanf(buffer,"%d", &from_server);
+  // write(fd, ACK, HANDSHAKE_BUFFER_SIZE);
   return from_server;
 }
 
