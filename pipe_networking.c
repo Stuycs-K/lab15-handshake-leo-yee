@@ -29,14 +29,19 @@ int server_setup() {
   returns the file descriptor for the upstream pipe (see server setup).
   =========================*/
 int server_handshake(int *to_client) {
-  printf("%s\n", "testing");
+  printf("%s\n", "start");
   int from_client = server_setup();
-  printf("%d\n", from_client);
+  int wk = from_client;
+  printf("[server]from client fd:%d\n", from_client);
   char buffer[HANDSHAKE_BUFFER_SIZE];
   read(from_client, buffer, HANDSHAKE_BUFFER_SIZE);
-  printf("%s\n", buffer);
+  printf("[server]from client:%s\n", buffer);
   int fd = open(buffer, O_WRONLY);
-  write(fd, buffer, HANDSHAKE_BUFFER_SIZE);
+  write(fd, "syn_ack", HANDSHAKE_BUFFER_SIZE);
+  char final[HANDSHAKE_BUFFER_SIZE];
+  read(wk, final, HANDSHAKE_BUFFER_SIZE);
+  printf("[server]from client:%s\n", final);
+
   // int from_client = server_setup();
   // char client[HANDSHAKE_BUFFER_SIZE];
   // sprintf(client, "%d", from_client);
@@ -67,20 +72,24 @@ int server_handshake(int *to_client) {
 int client_handshake(int *to_server) {
   int from_server;
   char buffer[HANDSHAKE_BUFFER_SIZE];
-  int ack;
   char pip[HANDSHAKE_BUFFER_SIZE];
   sprintf(pip, "%d", getpid());
-  printf("%s\n", pip);
+  printf("[client] pipe:%s\n", pip);
   mkfifo(pip, 0666);
   int fd = open(WKP, O_WRONLY);
+  int wk = fd;
   write(fd, pip, HANDSHAKE_BUFFER_SIZE);
   fd = open(pip, O_RDONLY);
   //blocks
   remove(pip);
   read(fd, buffer, HANDSHAKE_BUFFER_SIZE);
-  printf("%s\n", buffer);
+  printf("[client]from server:%s\n", buffer);
   sscanf(buffer,"%d", &from_server);
-  // write(fd, ACK, HANDSHAKE_BUFFER_SIZE);
+  // fd = open(pip, O_WRONLY);
+  // char n[HANDSHAKE_BUFFER_SIZE];
+  write(wk, "ack", HANDSHAKE_BUFFER_SIZE);
+  // read(fd, n, HANDSHAKE_BUFFER_SIZE);
+  // printf("%s\n", n);
   return from_server;
 }
 
