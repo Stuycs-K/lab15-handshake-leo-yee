@@ -5,31 +5,15 @@
 #include <unistd.h>
 void sig_handler(int signo) {
   if (signo == SIGINT) {
-    printf("\n[server]: SIGINT");
+    printf("\n[%d]: SIGINT\n", getpid());
     remove(WKP);
     exit(0);
   }
 }
-// int server_handshake(int *to_client) {
-//   printf("%s\n", "start");
-//   int from_client = server_setup();
-//   int wk = from_client;
-//   printf("[server]from client fd:%d\n", from_client);
-//   char buffer[HANDSHAKE_BUFFER_SIZE];
-//   read(from_client, buffer, HANDSHAKE_BUFFER_SIZE);
-//   printf("[server]from client:%s\n", buffer);
-//   int fd = open(buffer, O_WRONLY);
-//   *to_client = fd;
-//   write(fd, buffer, HANDSHAKE_BUFFER_SIZE);
-//   char final[HANDSHAKE_BUFFER_SIZE];
-//   read(wk, final, HANDSHAKE_BUFFER_SIZE);
-//   printf("[server]from client:%s\n", final);
-//   printf("%s\n", "handshake complete");
-//   return wk;
-// }
 
 int main() {
   signal(SIGINT, sig_handler);
+  printf("waiting for connection...\n");
   while(1){
     int to_client;
     int from_client;
@@ -37,7 +21,7 @@ int main() {
     mkfifo(WKP, 0666);
     from_client = open(WKP, O_RDONLY);
     remove(WKP);
-    printf("[server] client connected\n");
+    printf("[server] new client connected\n");
     //subserver
     pid_t p = fork();
     if (p == 0){
@@ -51,9 +35,9 @@ int main() {
       read(from_client, final, HANDSHAKE_BUFFER_SIZE);
 
       char buffer[HANDSHAKE_BUFFER_SIZE];
+      read(from_client, buffer, sizeof(buffer));
       while (read(from_client, buffer, sizeof(buffer)) > 0) {
         printf("[subserver %d]: %s\n", getpid(), buffer);
-        sleep(1);
       }
 
       printf("[subserver %d] client disconnected\n", getpid());
