@@ -10,7 +10,6 @@
   returns the file descriptor for the upstream pipe.
   =========================*/
 int server_setup() {
-  // printf("%s\n", "hi");
   int from_client;
   mkfifo(WKP, 0666);
   from_client = open(WKP, O_RDONLY);
@@ -43,7 +42,6 @@ int server_handshake(int *to_client) {
   read(wk, final, HANDSHAKE_BUFFER_SIZE);
   printf("[server]from client:%s\n", final);
 
-
   printf("%s\n", "handshake complete");
   return wk;
 }
@@ -70,16 +68,10 @@ int client_handshake(int *to_server) {
   *to_server = wk;
   write(fd, pip, HANDSHAKE_BUFFER_SIZE);
   fd = open(pip, O_RDONLY);
-  //blocks
   remove(pip);
   read(fd, buffer, HANDSHAKE_BUFFER_SIZE);
   printf("[client]from server:%s\n", buffer);
-  // sscanf(buffer,"%d", &from_server);
-  // fd = open(pip, O_WRONLY);
-  // char n[HANDSHAKE_BUFFER_SIZE];
   write(wk, "ack", HANDSHAKE_BUFFER_SIZE);
-  // read(fd, n, HANDSHAKE_BUFFER_SIZE);
-  // printf("%s\n", n);
   return fd;
 }
 

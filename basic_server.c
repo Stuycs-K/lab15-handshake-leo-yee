@@ -3,7 +3,6 @@
 int main() {
   int to_client;
   int from_client;
-  // printf("%s\n", "hi");
   from_client = server_handshake( &to_client );
   char final[HANDSHAKE_BUFFER_SIZE];
   read(from_client, final, HANDSHAKE_BUFFER_SIZE);
