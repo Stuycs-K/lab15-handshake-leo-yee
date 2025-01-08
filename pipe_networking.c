@@ -37,26 +37,15 @@ int server_handshake(int *to_client) {
   read(from_client, buffer, HANDSHAKE_BUFFER_SIZE);
   printf("[server]from client:%s\n", buffer);
   int fd = open(buffer, O_WRONLY);
-  write(fd, "syn_ack", HANDSHAKE_BUFFER_SIZE);
+  *to_client = fd;
+  write(fd, buffer, HANDSHAKE_BUFFER_SIZE);
   char final[HANDSHAKE_BUFFER_SIZE];
   read(wk, final, HANDSHAKE_BUFFER_SIZE);
   printf("[server]from client:%s\n", final);
 
-  // int from_client = server_setup();
-  // char client[HANDSHAKE_BUFFER_SIZE];
-  // sprintf(client, "%d", from_client);
-  // char buffer[HANDSHAKE_BUFFER_SIZE];
-  // int ack;
-  // read(from_client, buffer, HANDSHAKE_BUFFER_SIZE);
-  // sscanf(buffer,"%d", &from_client);
-  // int fd = open(from_client, O_WRONLY);
-  // //send SYN_ACK or pid + 1
-  // write(fd, SYN_ACK, HANDSHAKE_BUFFER_SIZE);
-  // read(from_client, buffer, HANDSHAKE_BUFFER_SIZE);
-  // sscanf(buffer,"%d", &ack);
 
   printf("%s\n", "handshake complete");
-  return from_client;
+  return wk;
 }
 
 
@@ -78,19 +67,20 @@ int client_handshake(int *to_server) {
   mkfifo(pip, 0666);
   int fd = open(WKP, O_WRONLY);
   int wk = fd;
+  *to_server = wk;
   write(fd, pip, HANDSHAKE_BUFFER_SIZE);
   fd = open(pip, O_RDONLY);
   //blocks
   remove(pip);
   read(fd, buffer, HANDSHAKE_BUFFER_SIZE);
   printf("[client]from server:%s\n", buffer);
-  sscanf(buffer,"%d", &from_server);
+  // sscanf(buffer,"%d", &from_server);
   // fd = open(pip, O_WRONLY);
   // char n[HANDSHAKE_BUFFER_SIZE];
   write(wk, "ack", HANDSHAKE_BUFFER_SIZE);
   // read(fd, n, HANDSHAKE_BUFFER_SIZE);
   // printf("%s\n", n);
-  return from_server;
+  return fd;
 }
 
 
