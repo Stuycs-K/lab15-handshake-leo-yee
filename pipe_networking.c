@@ -71,7 +71,7 @@ int client_handshake(int *to_server) {
   remove(pip);
   read(fd, buffer, HANDSHAKE_BUFFER_SIZE);
   printf("[client]from server:%s\n", buffer);
-  write(wk, "ack", HANDSHAKE_BUFFER_SIZE);
+  write(wk, "ack", 4);
   return fd;
 }
 
