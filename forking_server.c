@@ -26,18 +26,27 @@ int main() {
     pid_t p = fork();
     if (p == 0){
       //handshake
-      char hs[HANDSHAKE_BUFFER_SIZE];
+      char hs[HANDSHAKE_BUFFER_SIZE] = "";
       read(from_client, hs, HANDSHAKE_BUFFER_SIZE);
       int fd = open(hs, O_WRONLY);
       to_client = fd;
       write(fd, hs, HANDSHAKE_BUFFER_SIZE);
-      char final[HANDSHAKE_BUFFER_SIZE];
+      char final[HANDSHAKE_BUFFER_SIZE] = "";
       read(from_client, final, HANDSHAKE_BUFFER_SIZE);
 
-      char buffer[HANDSHAKE_BUFFER_SIZE];
-      read(from_client, buffer, sizeof(buffer));
+      char buffer[HANDSHAKE_BUFFER_SIZE] = "";
+      int b = read(from_client, buffer, 4);
+      // printf("%d\n", b);
+      int n = 0;
       while (read(from_client, buffer, sizeof(buffer)) > 0) {
         printf("[subserver %d]: %s\n", getpid(), buffer);
+        write(to_client, buffer, HANDSHAKE_BUFFER_SIZE);
+        sscanf(buffer, "%d", &n);
+        n += 1;
+        char new[HANDSHAKE_BUFFER_SIZE] = "";
+        sprintf(new, "%d", n);
+        write(to_client, new, sizeof(new));
+        printf("sending to client: %s\n", new);
       }
 
       printf("[subserver %d] client disconnected\n", getpid());
